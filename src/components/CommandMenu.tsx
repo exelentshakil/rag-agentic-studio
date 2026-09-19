@@ -23,6 +23,8 @@ import {
   Terminal,
   Sun,
   Moon,
+  BarChart3,
+  Search,
 } from 'lucide-react';
 
 interface CommandMenuProps {
