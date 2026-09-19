@@ -16,95 +16,80 @@ import {
 import { Button } from '@/components/ui/button';
 
 const SAMPLE_N8N_BLUEPRINT = {
-  name: 'GearSignal-Social-Listening-MVP',
+  name: 'RAG-Studio-Enterprise-Pipeline',
   nodes: [
     {
       id: 'node_1',
-      name: 'Centralized Config Loader',
-      type: 'n8n-nodes-base.googleSheets',
+      name: 'Document Ingestion Source',
+      type: 'n8n-nodes-base.googleDrive',
       parameters: {
         operation: 'read',
-        sheetId: '={{ $env.GEARSIGNAL_CONFIG_SHEET_ID }}',
-        range: 'Keywords_Triggers!A:E',
+        folderId: '={{ $env.RAG_SOURCE_FOLDER_ID }}',
       },
     },
     {
       id: 'node_2',
-      name: 'Multi-Community Poller',
-      type: 'n8n-nodes-base.httpRequest',
+      name: 'Semantic Text Chunker',
+      type: 'n8n-nodes-base.code',
       parameters: {
-        method: 'GET',
-        urls: [
-          'https://www.reddit.com/r/GuitarPedals/new.json?limit=25',
-          'https://www.thegearpage.net/board/index.php?forums/guitars.19/index.rss',
-          'https://www.talkbass.com/forums/for-sale-bass-guitars.126/index.rss',
-        ],
+        jsCode: '// Split document text into overlapping semantic blocks\nconst chunks = splitTextIntoChunks(input.text, 500, 50);\nreturn chunks;',
       },
     },
     {
       id: 'node_3',
-      name: 'SHA-256 Deduplication Cache',
-      type: 'n8n-nodes-base.crypto',
+      name: 'Dense Embedding Generator',
+      type: 'n8n-nodes-base.openAi',
       parameters: {
-        action: 'hash',
-        algorithm: 'sha256',
-        value: '={{ $json.platform + ":" + $json.id }}',
+        resource: 'embeddings',
+        model: 'text-embedding-3-small',
       },
     },
     {
       id: 'node_4',
-      name: 'Dual-Provider AI Classifier',
-      type: 'n8n-nodes-base.openAi',
+      name: 'Supabase Vector Upsert',
+      type: 'n8n-nodes-base.supabase',
       parameters: {
-        model: 'gpt-4o-mini',
-        temperature: 0.2,
-        systemPrompt: '={{ $node["Centralized Config Loader"].json.system_prompt }}',
+        operation: 'upsert',
+        tableName: 'document_chunks',
       },
     },
     {
       id: 'node_5',
-      name: 'Opportunity Filter (Score >= 7)',
-      type: 'n8n-nodes-base.if',
+      name: 'Cohere Cross-Encoder Rerank',
+      type: 'n8n-nodes-base.httpRequest',
       parameters: {
-        conditions: {
-          number: [
-            {
-              value1: '={{ $json.opportunity_score }}',
-              operation: 'largerEqual',
-              value2: 7,
-            },
-          ],
-        },
+        method: 'POST',
+        url: 'https://api.cohere.com/v1/rerank',
       },
     },
     {
       id: 'node_6',
-      name: 'Slack Block Kit Dispatcher',
-      type: 'n8n-nodes-base.slack',
+      name: 'Dual-Provider LLM Fallback',
+      type: 'n8n-nodes-base.openAi',
       parameters: {
-        channel: '#gear-leads-alerts',
-        blocks: '={{ $json.block_kit_payload }}',
+        model: 'gpt-4o-mini',
+        fallbackModel: 'gemini-2.0-flash',
       },
     },
   ],
   connections: {
-    'Centralized Config Loader': { main: [[{ node: 'Multi-Community Poller', type: 'main', index: 0 }]] },
-    'Multi-Community Poller': { main: [[{ node: 'SHA-256 Deduplication Cache', type: 'main', index: 0 }]] },
-    'SHA-256 Deduplication Cache': { main: [[{ node: 'Dual-Provider AI Classifier', type: 'main', index: 0 }]] },
-    'Dual-Provider AI Classifier': { main: [[{ node: 'Opportunity Filter (Score >= 7)', type: 'main', index: 0 }]] },
-    'Opportunity Filter (Score >= 7)': { main: [[{ node: 'Slack Block Kit Dispatcher', type: 'main', index: 0 }]] },
+    'Document Ingestion Source': { main: [[{ node: 'Semantic Text Chunker', type: 'main', index: 0 }]] },
+    'Semantic Text Chunker': { main: [[{ node: 'Dense Embedding Generator', type: 'main', index: 0 }]] },
+    'Dense Embedding Generator': { main: [[{ node: 'Supabase Vector Upsert', type: 'main', index: 0 }]] },
+    'Supabase Vector Upsert': { main: [[{ node: 'Cohere Cross-Encoder Rerank', type: 'main', index: 0 }]] },
+    'Cohere Cross-Encoder Rerank': { main: [[{ node: 'Dual-Provider LLM Fallback', type: 'main', index: 0 }]] },
   },
 };
 
 const SAMPLE_MAKE_BLUEPRINT = {
-  name: 'GearSignal-Make-Modular-MVP',
+  name: 'RAG-Studio-Make-Pipeline',
   flow: [
-    { id: 1, module: 'google-sheets:watchRows', label: '1. Ingest Keywords & Triggers' },
-    { id: 2, module: 'http:makeRequest', label: '2. Scrape r/GuitarPedals & TheGearPage' },
-    { id: 3, module: 'data-store:checkRecord', label: '3. Dedupe by Post URL / SHA256' },
-    { id: 4, module: 'openai:createChatCompletion', label: '4. gpt-4o-mini Categorize & Score 1-10' },
-    { id: 5, module: 'router:filter', label: '5. Filter Qualified Leads (Score >= 7)' },
-    { id: 6, module: 'slack:postMessage', label: '6. Send Block Kit Alert to #gear-leads-alerts' },
+    { id: 1, module: 'google-drive:watchFiles', label: '1. Ingest Raw PDF/Docs' },
+    { id: 2, module: 'pdf:extractText', label: '2. Extract Raw Metadata & Text Content' },
+    { id: 3, module: 'openai:createEmbeddings', label: '3. Generate dense vectors (text-embedding-3)' },
+    { id: 4, module: 'supabase:insertRecord', label: '4. Upsert with Metadata Filter Maps' },
+    { id: 5, module: 'http:rerank', label: '5. Real-time Hybrid BM25 & Cohere Rerank' },
+    { id: 6, module: 'openai:createChatCompletion', label: '6. Fallback LLM generation with Citations' },
   ],
 };
 
@@ -128,7 +113,7 @@ export function BlueprintExporter() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `gearsignal-${selectedFormat}-workflow.json`;
+    a.download = `rag-studio-${selectedFormat}-pipeline.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -191,7 +176,7 @@ export function BlueprintExporter() {
           <div className="flex items-center gap-2">
             <Code2 className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
             <span className="text-xs font-mono font-bold text-[var(--color-text-primary)]">
-              {selectedFormat === 'n8n' ? 'gearsignal-n8n-workflow.json' : 'gearsignal-make-blueprint.json'}
+              {selectedFormat === 'n8n' ? 'rag-studio-n8n-pipeline.json' : 'rag-studio-make-blueprint.json'}
             </span>
             <span className="text-xs text-[var(--color-text-muted)] font-mono">
               (v1.2.0 • 6 Nodes)
@@ -256,7 +241,7 @@ export function BlueprintExporter() {
             <span>Connect Credentials</span>
           </div>
           <p className="text-xs text-[var(--color-text-secondary)]">
-            Plug in your private OpenAI/Gemini API key, your Google Sheets ID, and your Slack incoming webhook URL.
+            Plug in your private OpenAI/Gemini API key, your Supabase Database URL, and your Cohere API key.
           </p>
         </div>
 
@@ -265,10 +250,10 @@ export function BlueprintExporter() {
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-mono text-xs">
               3
             </span>
-            <span>Activate 15m Schedule</span>
+            <span>Activate Auto Sync</span>
           </div>
           <p className="text-xs text-[var(--color-text-secondary)]">
-            Toggle the workflow to <strong>Active</strong>. The cron timer will poll r/GuitarPedals, TheGearPage, and TalkBass every 15 minutes.
+            Toggle the workflow to <strong>Active</strong>. The ingestion source will monitor your folders or document streams and sync index updates automatically.
           </p>
         </div>
       </div>

@@ -210,7 +210,7 @@ export default function HomePage() {
         </div>
       </main>
 
-      <Footer />
+      <Footer onNavigate={handleNavigate} />
 
       <ChaosSimulatorModal
         open={chaosModalOpen}

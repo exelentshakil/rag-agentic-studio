@@ -15,7 +15,17 @@ import {
   Sparkles,
 } from 'lucide-react';
 
-export function Footer() {
+interface FooterProps {
+  onNavigate?: (sectionId: string) => void;
+}
+
+export function Footer({ onNavigate }: FooterProps) {
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    if (onNavigate) {
+      e.preventDefault();
+      onNavigate(id);
+    }
+  };
   return (
     <footer className="w-full border-t border-[var(--color-border)] bg-[var(--color-surface)] py-12 px-4 sm:px-6 lg:px-8 mt-16">
       <div className="mx-auto max-w-7xl">
@@ -31,19 +41,19 @@ export function Footer() {
               <div className="space-y-3">
                 <div className="flex items-center gap-2.5">
                   <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white font-black text-sm shadow-xs shrink-0">
-                    GS
+                    AR
                   </div>
                   <div className="flex items-center gap-2 min-w-0 flex-wrap">
                     <span className="text-base font-extrabold tracking-tight text-[var(--color-text-primary)] whitespace-nowrap">
-                      GearSignal AI
+                      Agentic RAG
                     </span>
                     <span className="rounded-full bg-emerald-100 dark:bg-emerald-950 px-2 py-0.5 text-[10px] font-mono font-bold text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 whitespace-nowrap shrink-0">
-                      v1.2 Production MVP
+                      v1.0 Production Ready
                     </span>
                   </div>
                 </div>
                 <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
-                  High-intent social listening & opportunity scoring engine for musical gear marketplaces. Monitors Reddit, YouTube, TheGearPage, and TalkBass for Reverb/eBay fee fatigue and seller switching intent.
+                  High-fidelity Agentic RAG Platform combining hybrid dense + sparse search, cross-encoder reranking, parallel multi-agent Python backend execution, and comprehensive LLM firewall guards.
                 </p>
               </div>
 
@@ -54,7 +64,7 @@ export function Footer() {
                   <span className="text-[11px] font-semibold truncate">Inference: 94ms</span>
                 </div>
                 <span className="inline-flex items-center rounded-md bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 text-[10px] font-mono font-semibold text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 whitespace-nowrap shrink-0">
-                  100% Codebase Ownership
+                  100% Production Grade
                 </span>
               </div>
             </div>
@@ -78,19 +88,19 @@ export function Footer() {
                   </div>
                   <div className="flex items-center gap-1.5 rounded-md bg-[var(--color-surface)] border border-[var(--color-border-subtle)] px-2.5 py-1.5 shadow-2xs">
                     <Workflow className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                    <span className="truncate">n8n & Make Fleet</span>
+                    <span className="truncate">Python / FastAPI</span>
                   </div>
                   <div className="flex items-center gap-1.5 rounded-md bg-[var(--color-surface)] border border-[var(--color-border-subtle)] px-2.5 py-1.5 shadow-2xs">
                     <Layers className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                    <span className="truncate">Bloom Filter Dedupe</span>
+                    <span className="truncate">Hybrid Search Engine</span>
                   </div>
                   <div className="flex items-center gap-1.5 rounded-md bg-[var(--color-surface)] border border-[var(--color-border-subtle)] px-2.5 py-1.5 shadow-2xs">
                     <Activity className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                    <span className="truncate">Slack Block Kit</span>
+                    <span className="truncate">LLM Firewall Guard</span>
                   </div>
                   <div className="flex items-center gap-1.5 rounded-md bg-[var(--color-surface)] border border-[var(--color-border-subtle)] px-2.5 py-1.5 shadow-2xs">
                     <Code2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                    <span className="truncate">Airtable Data Sync</span>
+                    <span className="truncate">Cohere Reranker</span>
                   </div>
                 </div>
               </div>
@@ -161,25 +171,33 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="flex flex-col md:flex-row items-center justify-between border-t border-[var(--color-border)] pt-6 text-xs text-[var(--color-text-muted)] font-mono gap-4">
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-1.5 text-center md:text-left">
-            <span>© {new Date().getFullYear()} GearSignal AI</span>
+            <span>© {new Date().getFullYear()} Agentic RAG Studio</span>
             <span className="text-[var(--color-border)] select-none">•</span>
-            <span>Built for Custom Musical Gear Marketplaces</span>
+            <span>Söhne typography &amp; Stripe minimalism</span>
           </div>
 
           <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs">
-            <a href="#pipeline" className="hover:text-[var(--color-text-primary)] transition-colors whitespace-nowrap">
-              Pipeline Canvas
+            <a href="#briefing" onClick={(e) => handleLinkClick(e, 'briefing')} className="hover:text-[var(--color-text-primary)] transition-colors whitespace-nowrap">
+              Briefing &amp; Tour
             </a>
             <span className="text-[var(--color-border)] select-none hidden sm:inline">•</span>
-            <a href="#config" className="hover:text-[var(--color-text-primary)] transition-colors whitespace-nowrap">
-              Keyword Base
+            <a href="#metrics" onClick={(e) => handleLinkClick(e, 'metrics')} className="hover:text-[var(--color-text-primary)] transition-colors whitespace-nowrap">
+              Telemetry Dashboard
             </a>
             <span className="text-[var(--color-border)] select-none hidden sm:inline">•</span>
-            <a href="#slack" className="hover:text-[var(--color-text-primary)] transition-colors whitespace-nowrap">
-              Slack Cockpit
+            <a href="#rag-engine" onClick={(e) => handleLinkClick(e, 'rag-engine')} className="hover:text-[var(--color-text-primary)] transition-colors whitespace-nowrap">
+              RAG Search Engine
             </a>
             <span className="text-[var(--color-border)] select-none hidden sm:inline">•</span>
-            <a href="#blueprints" className="hover:text-[var(--color-text-primary)] transition-colors whitespace-nowrap">
+            <a href="#agentic-workflows" onClick={(e) => handleLinkClick(e, 'agentic-workflows')} className="hover:text-[var(--color-text-primary)] transition-colors whitespace-nowrap">
+              Agentic Workflows
+            </a>
+            <span className="text-[var(--color-border)] select-none hidden sm:inline">•</span>
+            <a href="#roi" onClick={(e) => handleLinkClick(e, 'roi')} className="hover:text-[var(--color-text-primary)] transition-colors whitespace-nowrap">
+              ROI Costing
+            </a>
+            <span className="text-[var(--color-border)] select-none hidden sm:inline">•</span>
+            <a href="#blueprints" onClick={(e) => handleLinkClick(e, 'blueprints')} className="hover:text-[var(--color-text-primary)] transition-colors whitespace-nowrap">
               Blueprints
             </a>
           </nav>

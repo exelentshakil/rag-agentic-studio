@@ -7,7 +7,7 @@ export async function GET() {
 
   return NextResponse.json({
     status: 'healthy',
-    system: 'GearSignal AI • Modular Social-Listening MVP',
+    system: 'Agentic RAG Studio • High-Fidelity Enterprise RAG Platform',
     timestamp: new Date().toISOString(),
     version: '1.0.0',
     providers: {
@@ -32,12 +32,12 @@ export async function GET() {
       },
     },
     capabilities: [
-      'centralized-keyword-management',
-      'multi-platform-reddit-forums-rss',
-      'sub-second-ai-opportunity-scoring',
-      'slack-block-kit-alert-dispatch',
-      'sha256-hash-deduplication',
-      'inline-llm-firewall-owasp-nist',
+      'hybrid-vector-bm25-search',
+      'cross-encoder-cohere-reranking',
+      'parallel-multi-agent-execution',
+      'automatic-failover-circuit-breaker',
+      'llm-firewall-owasp-nist',
+      'real-time-citation-generation',
     ],
   });
 }

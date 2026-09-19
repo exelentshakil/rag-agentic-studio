@@ -111,9 +111,9 @@ export function ChaosSimulatorModal({ open, onOpenChange }: ChaosSimulatorModalP
           <DialogTitle className="text-lg font-bold">
             Live Failure & Resilience Simulator
           </DialogTitle>
-          <DialogDescription className="text-xs text-[var(--color-text-secondary)]">
-            Test how GearSignal handles real-world API outages, rate limits, prompt injections, and duplicate floods without breaking.
-          </DialogDescription>
+         <DialogDescription className="text-xs text-[var(--color-text-secondary)]">
+            Test how Agentic RAG Studio handles real-world API outages, rate limits, prompt injections, and duplicate floods without breaking.
+         </DialogDescription>
         </DialogHeader>
 
         {/* 4 Chaos Scenario Triggers */}
